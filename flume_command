@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+source /home/hadoop/.bashrc
+source /home/hadoop/.bash_profile
+
+ip=(2 3 4)
+
+if [[ $1 = "status" || $1 = "stop" ]];then
+  for i in ${ip[@]} ;do
+    echo ""
+    echo "=============================     10.80.176.$i     ============================="
+    echo ""
+    if [[ $1 = "status" ]];then
+      ssh hadoop@10.80.176.$i 'ps -ef | grep flume | grep -v grep | grep -v status | awk \{print\ \$2\} '
+    elif [[ $1 = "stop" ]];then
+      ssh hadoop@10.80.176.$i 'ps -ef | grep flume | grep -v grep | grep -v stop | awk \{print\ \$2\} | xargs kill -9 '
+    fi
+    echo ""
+  done
+elif [[ $1 = "start" ]];then
+  echo "=============================     hadoop102 flume a1     ============================="
+  echo ""
+  nohup /opt/module/flume/bin/flume-ng agent --conf /opt/module/flume/conf/ -f /opt/module/flume/conf/flume-a1.conf -n a >/dev/null 2>&1 &
+  sleep 1
+  echo -e "\r"
+  echo "=============================     hadoop102 flume a2     ============================="
+  echo ""
+  nohup /opt/module/flume/bin/flume-ng agent --conf /opt/module/flume/conf/ -f /opt/module/flume/conf/flume-a2.conf -n a >/dev/null 2>&1 &
+  sleep 1
+  echo -e "\r"
+else
+  echo "请输入 start | status | stop"
+fi
